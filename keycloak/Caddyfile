@@ -1,0 +1,28 @@
+{$IDENTITY_DOMAIN} {
+ 
+  # Setup log file
+  log {
+    level INFO
+    output file /caddy.log {
+      roll_size 10MB
+      roll_local_time
+      roll_keep 10
+    }
+  }
+  
+  # Auto set up a let's encrypt cert
+  tls {$EMAIL}
+
+
+  # Required endpoints as per https://www.keycloak.org/server/reverseproxy
+  reverse_proxy /js/* keycloak:8080
+  reverse_proxy /realms/* keycloak:8080
+  reverse_proxy /resources/* keycloak:8080
+  reverse_proxy /robots.txt keycloak:8080
+  
+}
+
+{$KC_HOSTNAME_ADMIN_URL} {
+  tls internal
+  reverse_proxy * keycloak:8080
+}

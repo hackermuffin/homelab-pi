@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
+
+  caddy:
+    image: caddy
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ${VOLUME_PATH}caddy-data:/data
+      - ${VOLUME_PATH}caddy-logs:/log
+    ports:
+      - 8443:8443
+    environment:
+      TZ: ${TZ}
+      IDENTITY_DOMAIN: ${IDENTITY_DOMAIN}
+      KC_HOSTNAME_ADMIN_URL: ${KC_HOSTNAME_ADMIN_URL}
+      EMAIL: ${EMAIL}
+
+  keycloak:
+    build:
+      context: keycloak
+    restart: unless-stopped
+    command: start --optimized
+    environment:
+      KC_DB: mariadb
+      KC_DB_URL: "jdbc:mariadb://db/keycloak"
+      KC_DB_USERNAME: ${MARIADB_USER}
+      KC_DB_PASSWORD: ${MARIADB_PASSWORD}
+      KC_HOSTNAME: ${IDENTITY_DOMAIN}
+      KC_PROXY: edge
+      KC_HOSTNAME_ADMIN_URL: ${KC_HOSTNAME_ADMIN_URL}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+
+  db:
+    image: mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: keycloak
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_RANDOM_ROOT_PASSWORD: true
+    volumes:
+      - ${VOLUME_PATH}db-files:/var/lib/mysql
+
