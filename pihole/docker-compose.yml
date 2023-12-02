@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  # DNS server for adblock and dns over https
+  # No volumes, so gui changes will be non persistent
+  pihole:
+    image: pihole/pihole
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+      WEBPASSWORD: ${PIHOLE_PASSWORD}
+      PIHOLE_DNS_: 172.16.0.3#5053
+      DNSMASQ_LISTENING: all
+    network_mode: service:tailscale
+
+  # Run cloudflares dns over https service
+  dnshttps:
+    image: cloudflare/cloudflared
+    restart: unless-stopped
+    command: proxy-dns --address 0.0.0.0 --port 5053 --upstream https://1.1.1.1/dns-query --upstream https://1.0.0.1/dns-query 
+    networks:
+      pihole:
+        ipv4_address: 172.16.0.3
+
+  # Connect to tailnet
+  tailscale:
+    image: tailscale/tailscale
+    restart: unless-stopped
+    environment:
+      TS_EXTRA_ARGS: --login-server=${TAILSCALE_SERVER}
+      TS_HOSTNAME: ${TAILSCALE_HOSTNAME}
+      TS_AUTHKEY: ${TAILSCALE_AUTHKEY}
+      TS_STATE_DIR: "/var/lib/tailscale"
+    volumes:
+      - ${VOLUME_PATH}tailscale:/var/lib/tailscale
+    networks:
+      pihole:
+        ipv4_address: 172.16.0.2
+
+networks:
+  pihole:
+    ipam:
+      config:
+        - subnet: 172.16.0.0/24
