@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+
+  # Caddy web proxy to handle all web traffic
+  caddy:
+    image: caddy
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - "${VOLUME_PATH}caddy-data:/data"
+    environment:
+      TZ: ${TZ}
+      EMAIL: ${CADDY_EMAIL}
+      DOMAIN: ${HEADSCALE_URL}
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      control:
+      ui:
+  
+  # Run headscale control panel with ui
+  control:
+    image: headscale/headscale
+    restart: unless-stopped
+    command: headscale serve
+    volumes:
+      - ./headscale-config.yml:/root/.headscale/config.yml
+      - ${VOLUME_PATH}control:/etc/headscale
+    environment:
+      TZ: ${TZ}
+    networks:
+      control:
+
+  # UI for the headscale server
+  ui:
+    image: ghcr.io/gurucomputing/headscale-ui:latest
+    restart: unless-stopped
+    networks:
+      ui:
+
+networks:
+  control:
+  ui:
+

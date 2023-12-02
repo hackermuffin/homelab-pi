@@ -1,0 +1,8 @@
+
+{$DOMAIN}:443 {
+  # Proxy gui requests to the correct container
+  reverse_proxy /web* ui
+  
+  # Proxy all other traffic to headscale control server
+  reverse_proxy control:8080
+}
