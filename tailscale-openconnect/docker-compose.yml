@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  tailscale:
+    image: tailscale/tailscale:stable
+    restart: unless-stopped
+    network_mode: service:openconnect
+    environment:
+      TS_EXTRA_ARGS: --login-server=${TAILSCALE_SERVER} --advertise-routes=${TAILSCALE_ROUTES}
+      TS_HOSTNAME: ${TAILSCALE_HOSTNAME}
+      TS_AUTHKEY: ${TAILSCALE_AUTHKEY}
+      TS_STATE_DIR: "/var/lib/tailscale"
+    volumes:
+      - ${VOLUME_PATH}tailscale:/var/lib/tailscale
+
+  openconnect:
+    build: .
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    privileged: true
+    environment:
+      TZ: ${TZ}
+      SERVER: ${OPENCONNECT_SERVER}
+      PROTOCOL: ${OPENCONNECT_PROTOCOL}
+      USER: ${OPENCONNECT_USERNAME}
+      PASSWORD: ${OPENCONNECT_PASSWORD}
