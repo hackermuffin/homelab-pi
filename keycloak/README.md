@@ -2,7 +2,7 @@
 
 Docker config to get a [keycloak](https://www.keycloak.org/) identity server up and running.
 
-This config is set up to serve the identity endpoint to a [Cloudflare Tunnel](https://www.cloudflare.com/products/tunnel/), and the admin endpoint to the local network (with self-signed SSL) on a given url.
+This config is set up to serve the identity endpoint to a [Cloudflare Tunnel](https://www.cloudflare.com/products/tunnel/), and the admin endpoint to the over a tailscale network. If you want to get this up and running as your tailscale identity provider, you'll probably want this temporary serving to the local network.
 
 ## Cloudflare tunnel config
 

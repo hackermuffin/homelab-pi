@@ -23,6 +23,8 @@
 }
 
 {$KC_HOSTNAME_ADMIN_URL} {
-  tls internal
+  log {
+	level DEBUG
+  }
   reverse_proxy * keycloak:8080
 }

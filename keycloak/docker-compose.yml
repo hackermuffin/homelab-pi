@@ -15,8 +15,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ${VOLUME_PATH}caddy-data:/data
       - ${VOLUME_PATH}caddy-logs:/log
-    ports:
-      - 8443:8443
+    network_mode: service:tailscale
     environment:
       TZ: ${TZ}
       IDENTITY_DOMAIN: ${IDENTITY_DOMAIN}
@@ -50,3 +49,14 @@ services:
     volumes:
       - ${VOLUME_PATH}db-files:/var/lib/mysql
 
+  # tailscale for access to admin portal
+  tailscale:
+    image: tailscale/tailscale
+    restart: unless-stopped
+    environment:
+      TS_EXTRA_ARGS: --login-server=${TAILSCALE_SERVER}
+      TS_HOSTNAME: ${TAILSCALE_HOSTNAME}
+      TS_AUTHKEY: ${TAILSCALE_AUTHKEY}
+      TS_STATE_DIR: "/var/lib/tailscale"
+    volumes:
+      - ${VOLUME_PATH}tailscale:/var/lib/tailscale
