@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  tailscale:
+    image: tailscale/tailscale
+    restart: unless-stopped
+    environment:
+      TS_EXTRA_ARGS: --login-server=${TAILSCALE_SERVER} --advertise-exit-node ${TS_EXTRA_ARGS}
+      TS_HOSTNAME: ${TAILSCALE_HOSTNAME}
+      TS_AUTHKEY: ${TAILSCALE_AUTHKEY}
+      TS_STATE_DIR: "/var/lib/tailscale"
+    volumes:
+      - ${VOLUME_PATH}tailscale:/var/lib/tailscale
