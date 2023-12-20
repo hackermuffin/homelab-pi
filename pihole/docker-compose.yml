@@ -22,6 +22,15 @@ services:
       pihole:
         ipv4_address: 172.16.0.3
 
+  # Pihole prometheus exporter
+  prometheus:
+    image: ekofr/pihole-exporter
+    restart: unless-stopped
+    environment:
+      PIHOLE_HOSTNAME: tailscale
+      PIHOLE_PASSWORD: ${PIHOLE_PASSWORD}
+    network_mode: service:tailscale
+
   # Connect to tailnet
   tailscale:
     image: tailscale/tailscale
